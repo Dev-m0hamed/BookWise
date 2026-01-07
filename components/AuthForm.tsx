@@ -9,7 +9,7 @@ import {
   UseFormReturn,
   Path,
 } from "react-hook-form";
-import { z } from "zod";
+import { ZodType } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,10 +23,12 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
 import ImageUpload from "./ImageUpload";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Props<T extends FieldValues> {
   type: "signIn" | "signUp";
-  schema: z.ZodObject<T>;
+  schema: ZodType<T>;
   defaultValues: T;
   onSubmit: (data: T) => Promise<{ success: boolean; error?: string }>;
 }
@@ -37,12 +39,21 @@ function AuthForm<T extends FieldValues>({
   defaultValues,
   onSubmit,
 }: Props<T>) {
+  const router = useRouter();
   const isSignIn = type === "signIn";
   const form: UseFormReturn<T> = useForm<T>({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
-  const handleSubmit: SubmitHandler<T> = async (data) => {};
+  const handleSubmit: SubmitHandler<T> = async (data) => {
+    const result = await onSubmit(data);
+    if (result.success) {
+      toast.success(isSignIn ? "Signed in successfully!" : "Account created!");
+      router.push("/");
+    } else {
+      toast.error(result.error || "Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -90,7 +101,7 @@ function AuthForm<T extends FieldValues>({
           ))}
           <Button
             type="submit"
-            className="bg-primary text-dark-100 hover:bg-primary inline-flex min-h-14 w-full items-center justify-center rounded-md px-6 py-2 font-bold text-base"
+            className="bg-primary cursor-pointer text-dark-100 hover:bg-primary inline-flex min-h-14 w-full items-center justify-center rounded-md px-6 py-2 font-bold text-base"
           >
             {isSignIn ? "Sign In" : "Create Account"}
           </Button>

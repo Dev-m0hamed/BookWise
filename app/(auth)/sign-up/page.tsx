@@ -1,6 +1,7 @@
 'use client';
 
 import AuthForm from "@/components/AuthForm";
+import { signUp } from "@/lib/actions/auth";
 import { signUpSchema } from "@/lib/validations";
 
 function page() {
@@ -9,13 +10,13 @@ function page() {
       type="signUp"
       schema={signUpSchema}
       defaultValues={{
-        name: "",
+        fullName: "",
         email: "",
         password: "",
         universityId: 0,
         universityCard: "",
       }}
-      onSubmit={() => {}}
+      onSubmit={signUp}
     />
   );
 }
