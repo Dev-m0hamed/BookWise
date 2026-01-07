@@ -82,7 +82,10 @@ function AuthForm<T extends FieldValues>({
                   </FormLabel>
                   <FormControl>
                     {field.name === "universityCard" ? (
-                      <ImageUpload />
+                      <ImageUpload 
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     ) : (
                       <Input
                         required

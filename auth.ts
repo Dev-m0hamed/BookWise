@@ -6,6 +6,7 @@ import { users } from "./app/db/schema";
 import { compare } from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  basePath: "/api/auth",
   session: {
     strategy: "jwt",
   },

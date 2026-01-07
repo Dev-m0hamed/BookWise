@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, Bebas_Neue } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
+import { Providers } from "@/components/Providers";
 import { auth } from "@/auth";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -30,14 +30,14 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="en">
-      <SessionProvider session={session}>
-        <body
-          className={`${ibmPlexSans.className} ${bebasNeue.variable} antialiased`}
-        >
+      <body
+        className={`${ibmPlexSans.className} ${bebasNeue.variable} antialiased`}
+      >
+        <Providers session={session}>
           {children}
           <Toaster />
-        </body>
-      </SessionProvider>
+        </Providers>
+      </body>
     </html>
   );
 }
