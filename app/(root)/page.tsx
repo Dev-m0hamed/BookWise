@@ -7,6 +7,7 @@ export default function Home() {
     <>
       <BookOverview {...sampleBooks[0]} />
       <BookList
+        title="Latest Books"
         books={sampleBooks}
       />
     </>
