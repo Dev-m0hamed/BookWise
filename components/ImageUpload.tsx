@@ -33,8 +33,9 @@ const authenticator = async () => {
     const data = await response.json();
     const { token, expire, signature } = data;
     return { token, expire, signature };
-  } catch (error: any) {
-    throw new Error(`Authentication request failed: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Authentication request failed: ${errorMessage}`);
   }
 };
 
@@ -84,7 +85,7 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
 
       const imagePath = response.filePath;
       setPreview(imagePath);
-      if (onChange) {
+      if (onChange && response.url) {
         onChange(response.url);
       }
     } catch (error) {
@@ -141,7 +142,7 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
           <Button
             type="button"
             onClick={handleRemove}
-            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 p-2 h-auto z-10"
+            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 p-2 h-auto z-10 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </Button>
