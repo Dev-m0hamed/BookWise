@@ -41,6 +41,7 @@ function AuthForm<T extends FieldValues>({
   const router = useRouter();
   const isSignIn = type === "signIn";
   const form = useForm({
+    //@ts-ignore
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
