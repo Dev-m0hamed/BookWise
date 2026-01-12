@@ -1,5 +1,5 @@
 import { serve } from "@upstash/workflow/nextjs";
-import emailjs from "@emailjs/browser";
+import emailjs from "@emailjs/nodejs";
 import config from "@/lib/config";
 import { db } from "@/app";
 import { users } from "@/app/db/schema";
