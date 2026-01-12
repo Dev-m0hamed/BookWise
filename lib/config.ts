@@ -19,6 +19,7 @@ const config = {
       generalId: process.env.EMAILJS_GENERAL_TEMPLATE_ID!,
       receiptId: process.env.EMAILJS_RECEIPT_TEMPLATE_ID!,
       publicKey: process.env.EMAILJS_PUBLIC_KEY!,
+      privateKey: process.env.EMAILJS_PRIVATE_KEY!,
     },
   },
 };
