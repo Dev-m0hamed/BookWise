@@ -94,6 +94,7 @@ async function sendGeneralEmail(data: {
       },
       {
         publicKey: config.env.emailJs.publicKey,
+        privateKey: config.env.emailJs.privateKey,
       }
     );
 
