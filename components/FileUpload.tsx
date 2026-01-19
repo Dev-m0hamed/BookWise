@@ -8,12 +8,15 @@ import {
   ImageKitAbortError,
   ImageKitUploadNetworkError,
   ImageKitServerError,
+  ImageKitProvider,
+  Video,
 } from "@imagekit/next";
 import { useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 const {
   env: {
@@ -39,12 +42,23 @@ const authenticator = async () => {
   }
 };
 
-interface ImageUploadProps {
-  value?: string;
+interface Props {
+  type: "image" | "video";
+  value: string;
+  accept: string;
+  placeholder: string;
+  variant: "dark" | "light";
   onChange?: (value: string) => void;
 }
 
-function ImageUpload({ value, onChange }: ImageUploadProps) {
+function FileUpload({
+  type,
+  value,
+  accept,
+  placeholder,
+  variant,
+  onChange,
+}: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -54,6 +68,7 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!onValidate(file)) return;
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -127,22 +142,52 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
     fileInputRef.current?.click();
   };
 
+  const onValidate = (file: File) => {
+    if (type === "image") {
+      if (file.size > 20 * 1024 * 1024) {
+        toast("File size too large", {
+          description: "Please upload a file that is less than 20MB in size",
+        });
+        return false;
+      }
+    } else if (type === "video") {
+      if (file.size > 50 * 1024 * 1024) {
+        toast("File size too large", {
+          description: "Please upload a file that is less than 50MB in size",
+        });
+        return false;
+      }
+    }
+    return true;
+  };
+
   return (
     <div className="w-full">
       {preview ? (
-        <div className="relative w-full bg-dark-300 rounded-md overflow-hidden border border-dark-400">
-          <IKImage
-            urlEndpoint={urlEndpoint}
-            src={preview}
-            alt="Uploaded university card"
-            width={400}
-            height={300}
-            className="w-full h-auto object-cover"
-          />
+        <div className="relative w-full rounded-md overflow-hidden">
+          <ImageKitProvider urlEndpoint={urlEndpoint}>
+            {type === "image" ? (
+              <IKImage
+                src={preview}
+                alt="Uploaded Image"
+                width={400}
+                height={300}
+                className="w-full h-auto object-cover"
+              />
+            ) : (
+              <Video
+                src={preview}
+                controls
+                width={400}
+                height={300}
+                className="w-full h-auto object-cover"
+              />
+            )}
+          </ImageKitProvider>
           <Button
             type="button"
             onClick={handleRemove}
-            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 p-2 h-auto z-10 cursor-pointer"
+            className="absolute top-2 right-2 bg-red-600 hover:bg-red-500 p-2 h-auto z-10 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </Button>
@@ -151,26 +196,37 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
         <div className="w-full">
           <div
             onClick={!uploading ? triggerUpload : undefined}
-            className={`w-full min-h-14 bg-dark-300 rounded-md ${
-              !uploading ? "hover:bg-dark-400 cursor-pointer" : ""
-            } transition-colors flex flex-col items-center justify-center gap-2 py-1 px-3`}
+            className={cn(
+              variant === "dark"
+                ? "bg-dark-300"
+                : "bg-light-600 border border-gray-100",
+              "w-full min-h-14 rounded-md flex flex-col items-center justify-center gap-2 py-1 px-3 cursor-pointer"
+            )}
           >
             {uploading ? (
               <>
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <p className="text-light-100 text-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-100"></div>
+                <p
+                  className={cn(
+                    "text-sm",
+                    variant === "dark" ? "text-light-100" : "text-slate-500"
+                  )}
+                >
                   Uploading... {Math.round(progress)}%
                 </p>
-                <div className="w-full max-w-xs bg-dark-400 rounded-full h-2">
+                <div className="w-full max-w-xs rounded-full h-2">
                   <div
-                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    className="bg-green h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
                 <Button
                   type="button"
                   onClick={handleAbortUpload}
-                  className="mt-2 bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-1 h-auto"
+                  className={cn(
+                    "mt-2 text-white text-xs px-4 py-1 h-auto cursor-pointer",
+                    variant === "dark" ? "bg-primary" : "bg-primary-admin"
+                  )}
                 >
                   Cancel Upload
                 </Button>
@@ -185,7 +241,13 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
                     height={20}
                     className="object-contain"
                   />
-                  <p className="text-light-100 text-base">Upload a File</p>
+                  <p
+                    className={cn(
+                      variant === "dark" ? "text-light-100" : "text-slate-500"
+                    )}
+                  >
+                    {placeholder}
+                  </p>
                 </div>
               </>
             )}
@@ -194,7 +256,7 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept="image/*"
+            accept={accept}
             style={{ display: "none" }}
             disabled={uploading}
           />
@@ -204,4 +266,4 @@ function ImageUpload({ value, onChange }: ImageUploadProps) {
   );
 }
 
-export default ImageUpload;
+export default FileUpload;

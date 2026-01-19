@@ -4,6 +4,7 @@ import {
   pgTable,
   varchar,
   integer,
+  doublePrecision,
   date,
   timestamp,
   pgEnum,
@@ -33,4 +34,20 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
+});
+
+export const books = pgTable("books", {
+  id: uuid().notNull().primaryKey().defaultRandom().unique(),
+  title: varchar().notNull(),
+  author: varchar().notNull(),
+  genre: text().notNull(),
+  rating: doublePrecision().notNull(),
+  coverUrl: text("cover_url").notNull(),
+  coverColor: varchar("cover_color", { length: 7 }).notNull(),
+  description: text().notNull(),
+  totalCopies: integer("total_copies").notNull().default(1),
+  availableCopies: integer("available_copies").notNull().default(0),
+  videoUrl: text("video_url").notNull(),
+  summary: varchar().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
