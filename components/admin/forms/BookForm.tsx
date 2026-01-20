@@ -27,19 +27,19 @@ interface Props extends Partial<Book> {
 
 function BookForm({ type, ...book }: Props) {
   const router = useRouter();
-  const form = useForm<z.infer<typeof bookSchema>>({
+  const form = useForm({
     resolver: zodResolver(bookSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      author: "",
-      genre: "",
-      rating: 1,
-      totalCopies: 1,
-      coverUrl: "",
-      coverColor: "",
-      videoUrl: "",
-      summary: "",
+      title: book.title || "",
+      description: book.description || "",
+      author: book.author || "",
+      genre: book.genre || "",
+      rating: book.rating || 1,
+      totalCopies: book.totalCopies || 1,
+      coverUrl: book.coverUrl || "",
+      coverColor: book.coverColor || "",
+      videoUrl: book.videoUrl || "",
+      summary: book.summary || "",
     },
   });
   const onSubmit = async (values: z.infer<typeof bookSchema>) => {
@@ -128,6 +128,8 @@ function BookForm({ type, ...book }: Props) {
                   max={5}
                   placeholder="Book rating"
                   {...field}
+                  value={field.value as number}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                   className="min-h-14 border border-gray-100 bg-light-600 p-4 text-base font-semibold placeholder:font-normal placeholder:text-slate-500"
                 />
               </FormControl>
@@ -150,6 +152,8 @@ function BookForm({ type, ...book }: Props) {
                   max={10000}
                   placeholder="Total copies"
                   {...field}
+                  value={field.value as number}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                   className="min-h-14 border border-gray-100 bg-light-600 p-4 text-base font-semibold placeholder:font-normal placeholder:text-slate-500"
                 />
               </FormControl>
